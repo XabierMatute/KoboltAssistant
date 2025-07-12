@@ -1,0 +1,1 @@
+- [ ] Revisa que ID se utiliza al meter entradas
