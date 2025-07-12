@@ -90,6 +90,30 @@ class NameTable {
     }
     print('Table names filled with example names');
   }
+
+    static Future<void> updateName(int id, String newName, String newDescription) async {
+    final db = await DatabaseService.getDatabase();
+    await db.update(
+      'names',
+      {
+        'name': newName,
+        'description': newDescription,
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    print('Updated name: $id to $newName with description $newDescription');
+  }
+
+  static Future<void> deleteNameById(int id) async {
+    final db = await DatabaseService.getDatabase();
+    await db.delete(
+      'names',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    print('Deleted name with id: $id');
+  }
 }
 
 const nombresEj = [
