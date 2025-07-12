@@ -1,6 +1,7 @@
+import 'package:caravana_enana/db/database.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:enanos/db/database.dart';
+import 'database.dart';
 
 class Name {
   final int id;
@@ -29,8 +30,9 @@ class NameTable {
     await db.insert(
       'names',
       name.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
+      conflictAlgorithm: ConflictAlgorithm.replace
     );
+    print('Inserted name: ${name.id} ${name.name}');
   }
 
   static Future<List<Name>> getNames() async {
@@ -45,4 +47,73 @@ class NameTable {
       );
     });
   }
+
+  // get a specific name by id
+  static Future<Name?> getNameById(int id) async {
+    final db = await DatabaseService.getDatabase();
+    final List<Map<String, dynamic>> maps = await db.query(
+      'names',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return Name(
+        id: maps[0]['id'],
+        name: maps[0]['name'],
+        description: maps[0]['description'],
+      );
+    } else {
+      return null; // No name found with the given id
+    }
+  }
+
+  // empty the table
+  static Future<void> emptyTable() async {
+    final db = await DatabaseService.getDatabase();
+    await db.delete('names');
+    print('Table names emptied');
+  }
+
+  // fill the table with example names
+  static Future<void> fillTableWithExamples() async {
+    final db = await DatabaseService.getDatabase();
+    await emptyTable(); // Clear the table first
+
+    for (int i = 0; i < nombresEj.length; i++) {
+      final name = Name(
+        id: i + 1,
+        name: nombresEj[i],
+        description: 'Descripción del nombre ${nombresEj[i]}',
+      );
+      await insertName(name);
+    }
+    print('Table names filled with example names');
+  }
 }
+
+const nombresEj = [
+    "Cuarzo", "Amatista", "Topacio", "Esmeralda", "Zafiro",
+    "Rubí", "Diamante", "Obsidiana", "Lapislázuli", "Jade",
+    "Turquesa", "Granate", "Citrino", "Malaquita", "Ónice",
+    "Ágata", "Pirita", "Hematites", "Azurita",
+    "Dwayne", "Coral", "Perla", "Nácar", "Aguamarina", "Turmalina",
+    "Concha", "Caracola", "Asteroidea", "Anémona",
+    "Medusa", "Tortuga", "quelonio", "Polvora",
+    "Aarón", "Abdías", "Abdón", "Abel", "Abigaíl", "Abraham", "Absalón", "Ada", 
+    "Adán", "Adriel", "Amós", "Ana", "Ananías", "Ariel", "Axa", "Bartolomé", 
+    "Belén", "Benjamín", "Bernabé", "Betsabé", "Betuel", "Carmelo", "Carmen", 
+    "Dalila", "Daniel", "David", "Débora", "Efraím", "Eleazar", "Elías", 
+    "Eliel", "Eliezer", "Elisa", "Eliseo", "Enoc", "Enós", "Esaú", "Esdras", 
+    "Ester", "Eva", "Ezequiel", "Fanny", "Gabriel", "Gamaliel", "Gedeón", 
+    "Gerson", "Goliat", "Herodes", "Hosanna", "Isaac", "Isaías", "Iska", 
+    "Ismael", "Israel", "Iván", "Jacobo", "Jael", "Jaime", "Jair", "Jairo", 
+    "Janai", "Jerahmeel", "Jeremías", "Jessica", "Joaquín", "Job", "Joel", 
+    "Johann", "José", "Josefa", "Josías", "Josué", "Juan", "Juana", "Judá", 
+    "Judit", "Labán", "Lázaro", "Leví", "Lucas", "Magdalena", "Manuel", 
+    "María", "Marta", "Micaela", "Miguel", "Milca", "Miqueas", "Míriam", 
+    "Nahum", "Nancy", "Natán", "Nathaniel", "Nehemías", "Noé", "Noel", 
+    "Noemí", "Rafael", "Rafaela", "Raquel", "Rebeca", "Rut", "Samuel", 
+    "Santiago", "Sara", "Saúl", "Sulamita", "Tobías", "Urías", "Uriel", 
+    "Zabulón", "Zacarías"
+];

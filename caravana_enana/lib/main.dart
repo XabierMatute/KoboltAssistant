@@ -1,6 +1,20 @@
 import 'package:flutter/material.dart';
 
+import 'package:caravana_enana/db/database.dart';
+import 'package:caravana_enana/db/name.dart';
+
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Initialize the database
+  DatabaseService.initializeDatabase().then((db) {
+    // Insert example names into the database
+    var i = 0;
+    for (var name in nombresEj) {
+      NameTable.insertName(Name(id: i, name: name, description: 'Descripción de $name'));
+      i++;
+    }
+  });
+  // Run the app
   runApp(const MyApp());
 }
 
@@ -104,11 +118,51 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Text(
+              NameTable.getNames().toString(),
+            ),
             const Text('You have pushed the button this many times:'),
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            const Text(
+              'This is the name with id 1: ',
+            ),
+            FutureBuilder<Name?>(
+              future: NameTable.getNameById(1),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else if (!snapshot.hasData || snapshot.data == null) {
+                  return const Text('No name found with id 1');
+                } else {
+                  final name = snapshot.data!;
+                  return Text('Name: ${name.name}, Description: ${name.description}');
+                }
+              },
+            ),
+            Text(
+              'This is the name with id $_counter: ',
+            ),
+            FutureBuilder(
+              future: NameTable.getNameById(_counter),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else if (!snapshot.hasData || snapshot.data == null) {
+                  return const Text('No name found with this id');
+                } else {
+                  final name = snapshot.data as Name;
+                  return Text('Name: ${name.name}, Description: ${name.description}');
+                }
+              },
+            ),
+
           ],
         ),
       ),
