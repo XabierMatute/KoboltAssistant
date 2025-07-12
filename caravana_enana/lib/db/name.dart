@@ -22,6 +22,14 @@ class Name {
   String toString() {
     return 'Name{id: $id, name: $name, description: $description}';
   }
+
+  String getTitle() {
+    return name;
+  }
+
+  String getSubtitle() {
+    return description;
+  }
 }
 
 class NameTable {
@@ -102,8 +110,10 @@ class NameTable {
       where: 'id = ?',
       whereArgs: [id],
     );
+
     print('Updated name: $id to $newName with description $newDescription');
   }
+
 
   static Future<void> deleteNameById(int id) async {
     final db = await DatabaseService.getDatabase();
@@ -114,6 +124,7 @@ class NameTable {
     );
     print('Deleted name with id: $id');
   }
+
 }
 
 const nombresEj = [
