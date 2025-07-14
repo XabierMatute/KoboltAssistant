@@ -8,7 +8,7 @@ class DatabaseService {
       onCreate: (db, version) {
         // Aquí puedes crear múltiples tablas si es necesario
         db.execute(
-          'CREATE TABLE enanos(id INTEGER PRIMARY KEY, name TEXT, title TEXT)',
+          'CREATE TABLE dwarves(id INTEGER PRIMARY KEY, name INTEGER, title INTEGER, description TEXT)',
           // , job TEXT, age TEXT, description TEXT)',
         );
         db.execute(
@@ -26,6 +26,18 @@ class DatabaseService {
       },
       version: 1,
     );
+  }
+
+  // destroy database
+  static Future<void> destroyDatabase() async {
+    final dbPath = await getDatabasesPath();
+    final dbFile = join(dbPath, 'enanos_database.db');
+    await deleteDatabase(dbFile);
+  }
+
+  // get database path
+  static Future<String> getDatabasePath() async {
+    return join(await getDatabasesPath(), 'enanos_database.db');
   }
 
   static Future<Database> getDatabase() async {
