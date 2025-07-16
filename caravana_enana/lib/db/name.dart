@@ -1,7 +1,5 @@
 import 'package:caravana_enana/db/database.dart';
-import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'database.dart';
 
 class Name {
   final int id;
@@ -33,6 +31,26 @@ class Name {
 }
 
 class NameTable {
+  // Initialize the database and create the names table
+  static Future<void> initialize() async {
+    final db = await DatabaseService.getDatabase();
+    await db.execute(
+      'CREATE TABLE IF NOT EXISTS names(id INTEGER PRIMARY KEY, name TEXT, description TEXT)',
+    );
+    print('Table names initialized');
+  }
+
+  // get first available id
+  static Future<int> getFirstAvailableId() async {
+    final db = await DatabaseService.getDatabase();
+    final List<Map<String, dynamic>> maps = await db.query('names', orderBy: 'id DESC', limit: 1);
+    if (maps.isNotEmpty) {
+      return maps[0]['id'] + 1; // Return the next available id
+    } else {
+      return 1; // If no names exist, start with id 1
+    }
+  }
+
   static Future<void> insertName(Name name) async {
     final db = await DatabaseService.getDatabase();
     await db.insert(
@@ -99,7 +117,7 @@ class NameTable {
     print('Table names filled with example names');
   }
 
-    static Future<void> updateName(int id, String newName, String newDescription) async {
+  static Future<void> updateName(int id, String newName, String newDescription) async {
     final db = await DatabaseService.getDatabase();
     await db.update(
       'names',

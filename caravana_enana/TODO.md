@@ -1,1 +1,4 @@
 - [ ] Revisa que ID se utiliza al meter entradas
+- [ ] El tema de que los enanos funcione con id
+- [ ] Añadir lo de identificadores de genero y clan a los nombres y titulos
+- [ ] Hacer la clase atributo o algo así

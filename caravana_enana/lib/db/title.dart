@@ -24,6 +24,16 @@ class FantasyTitle {
 }
 
 class TitleTable {
+  // Initialize the database and create the titles table
+  static Future<void> initialize() async {
+    final db = await DatabaseService.getDatabase();
+    await db.execute(
+      'CREATE TABLE IF NOT EXISTS titles(id INTEGER PRIMARY KEY, name TEXT, description TEXT)',
+    );
+    print('Table titles initialized');
+  }
+
+
   static Future<void> insertTitle(FantasyTitle title) async {
     final db = await DatabaseService.getDatabase();
     await db.insert(

@@ -26,6 +26,16 @@ class Dwarf {
 }
 
 class DwarfTable {
+  // Initialize the database and create the dwarves table
+  static Future<void> initialize() async {
+    final db = await DatabaseService.getDatabase();
+    await db.execute(
+      'CREATE TABLE IF NOT EXISTS dwarves(id INTEGER PRIMARY KEY, name TEXT, title TEXT)',
+    );
+    print('Table dwarves initialized');
+  }
+
+
   static Future<void> insertDwarf(Dwarf dwarf) async {
     final db = await DatabaseService.getDatabase();
     await db.insert(

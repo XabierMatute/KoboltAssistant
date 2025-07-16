@@ -1,43 +1,41 @@
+import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:caravana_enana/db/name.dart';
+import 'package:caravana_enana/db/title.dart';
+import 'package:caravana_enana/db/dwarf.dart';
+
+
+const tables = {
+  'dwarves': DwarfTable,
+  'names': NameTable,
+  'titles': TitleTable,
+};
 
 class DatabaseService {
   static Future<Database> initializeDatabase() async {
     return openDatabase(
       join(await getDatabasesPath(), 'enanos_database.db'),
-      onCreate: (db, version) {
-        // Aquí puedes crear múltiples tablas si es necesario
-        db.execute(
-          'CREATE TABLE dwarves(id INTEGER PRIMARY KEY, name INTEGER, title INTEGER, description TEXT)',
-          // , job TEXT, age TEXT, description TEXT)',
-        );
-        db.execute(
-          'CREATE TABLE names(id INTEGER PRIMARY KEY, name TEXT, description TEXT)',
-        );
-        // db.execute(
-        //   'CREATE TABLE jobs(id INTEGER PRIMARY KEY, name TEXT, description TEXT)',
-        // );
-        // db.execute(
-        //   'CREATE TABLE clans(id INTEGER PRIMARY KEY, name TEXT, description TEXT)',
-        // );
-        db.execute(
-          'CREATE TABLE titles(id INTEGER PRIMARY KEY, name TEXT, description TEXT)',
-        );
-      },
+      onCreate: createTables,
       version: 1,
     );
   }
 
-  // destroy database
-  static Future<void> destroyDatabase() async {
-    final dbPath = await getDatabasesPath();
-    final dbFile = join(dbPath, 'enanos_database.db');
-    await deleteDatabase(dbFile);
+  static FutureOr<void> createTables(db, version) {
+      for (var table in tables.values) {
+        table.initialize();
+      }
+      print('All tables initialized');
+      return Future.wait(tables.values.map((table) => table.initialize()));
   }
 
-  // get database path
   static Future<String> getDatabasePath() async {
     return join(await getDatabasesPath(), 'enanos_database.db');
+  }
+
+  static Future<void> destroyDatabase() async {
+    final dbFile = await getDatabasePath();
+    await deleteDatabase(dbFile);
   }
 
   static Future<Database> getDatabase() async {
