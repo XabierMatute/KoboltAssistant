@@ -152,4 +152,13 @@ const titlesEj = [
     "picoroto", "dospicos",
     "dinamitas",
     "el del hacha",
-];
+    "la roca",
+    "el bizco", "el tuerto", "el ciego", "ojoselficos",
+    "el topo", "el murcielago", "el gritos",
+    "el palido", "bigoteretorcido",
+    "bigotefino", "bigotegordo",
+    "el basado", "el goblin",
+    "el minimalista", "el enano",
+    "el nordico", "el verde", "el rojo",
+    "sudores",
+    ];

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:caravana_enana/db/dwarf.dart';
+import 'dart:io';
 
 class DwarvesScreen extends StatefulWidget {
   const DwarvesScreen({super.key});
@@ -55,6 +57,25 @@ class _DwarvesScreenState extends State<DwarvesScreen> {
     }
   }
 
+  Future<void> _pickPhoto(BuildContext context, Dwarf dwarf) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      try {
+        await DwarfTable.updateDwarfPhoto(dwarf.id, pickedFile.path);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Foto añadida al enano')),
+        );
+        _refreshDwarves();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al añadir la foto: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,11 +106,27 @@ class _DwarvesScreenState extends State<DwarvesScreen> {
               itemBuilder: (context, index) {
                 final dwarf = _dwarves[index];
                 return ListTile(
+                  leading: dwarf.photoPath != null
+                      ? CircleAvatar(
+                          backgroundImage: FileImage(File(dwarf.photoPath!)),
+                        )
+                      : const CircleAvatar(
+                          child: Icon(Icons.person),
+                        ),
                   title: Text(dwarf.name),
                   subtitle: Text(dwarf.title),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () => _deleteDwarf(context, dwarf.id),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.photo),
+                        onPressed: () => _pickPhoto(context, dwarf),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () => _deleteDwarf(context, dwarf.id),
+                      ),
+                    ],
                   ),
                 );
               },

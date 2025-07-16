@@ -35,6 +35,7 @@ class _GenerateDwarvesScreenState extends State<GenerateDwarvesScreen> {
           const SnackBar(content: Text('Enano guardado exitosamente')),
         );
       } catch (e) {
+        print('Error al guardar el enano: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al guardar el enano: $e')),
         );

@@ -8,20 +8,22 @@ class Dwarf {
   final int id;
   final String name;
   final String title;
+  final String? photoPath; // Optional path to the image
 
-  Dwarf({required this.id, required this.name, required this.title});
+  Dwarf({required this.id, required this.name, required this.title, this.photoPath});
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'name': name,
       'title': title,
+      'photo_path': photoPath, // Include photoPath in the map
     };
   }
 
   @override
   String toString() {
-    return 'Dwarf{id: $id, name: $name, title: $title}';
+    return 'Dwarf{id: $id, name: $name, title: $title, photoPath: $photoPath}';
   }
 }
 
@@ -30,11 +32,17 @@ class DwarfTable {
   static Future<void> initialize() async {
     final db = await DatabaseService.getDatabase();
     await db.execute(
-      'CREATE TABLE IF NOT EXISTS dwarves(id INTEGER PRIMARY KEY, name TEXT, title TEXT)',
+      '''
+      CREATE TABLE IF NOT EXISTS dwarves(
+        id INTEGER PRIMARY KEY,
+        name TEXT,
+        title TEXT,
+        photo_path TEXT
+      )
+      ''',
     );
     print('Table dwarves initialized');
   }
-
 
   static Future<void> insertDwarf(Dwarf dwarf) async {
     final db = await DatabaseService.getDatabase();
@@ -43,7 +51,7 @@ class DwarfTable {
       dwarf.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    print('Inserted dwarf: ${dwarf.id} ${dwarf.name} (${dwarf.title})');
+    print('Inserted dwarf: ${dwarf.id} ${dwarf.name} (${dwarf.title}) Photo: ${dwarf.photoPath}');
   }
 
   static Future<List<Dwarf>> getDwarves() async {
@@ -55,6 +63,7 @@ class DwarfTable {
         id: maps[i]['id'],
         name: maps[i]['name'],
         title: maps[i]['title'],
+        photoPath: maps[i]['photo_path'], // Retrieve photoPath
       );
     });
   }
@@ -72,10 +81,22 @@ class DwarfTable {
         id: maps[0]['id'],
         name: maps[0]['name'],
         title: maps[0]['title'],
+        photoPath: maps[0]['photo_path'], // Retrieve photoPath
       );
     } else {
       return null; // No dwarf found with the given id
     }
+  }
+
+  static Future<void> updateDwarfPhoto(int id, String photoPath) async {
+    final db = await DatabaseService.getDatabase();
+    await db.update(
+      'dwarves',
+      {'photo_path': photoPath},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    print('Updated photo for dwarf with id: $id');
   }
 
   static Future<void> emptyTable() async {
@@ -102,6 +123,7 @@ class DwarfTable {
       id: DateTime.now().millisecondsSinceEpoch, // Generate unique ID
       name: randomName,
       title: randomTitle,
+      photoPath: null, // Default photoPath is null
     );
   }
 
