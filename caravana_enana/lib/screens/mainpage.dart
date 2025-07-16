@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:caravana_enana/screens/attributes.dart';
 import 'package:caravana_enana/screens/dwarves.dart';
 import 'package:caravana_enana/screens/generate_dwarves.dart';
-import 'package:caravana_enana/screens/db_utils.dart'; // Importa la página de utilidades de base de datos
+import 'package:caravana_enana/screens/db_utils.dart';
+import 'package:caravana_enana/screens/generate_face.dart'; // Importa la página de generar caras
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
@@ -73,6 +74,18 @@ class PageList extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const DatabaseUtilsScreen()),
+            );
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.face),
+          title: const Text('Generar Cara'),
+          subtitle: const Text('Crea caras para los enanos'),
+          trailing: const Icon(Icons.arrow_forward),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const GenerateFaceScreen()),
             );
           },
         ),
