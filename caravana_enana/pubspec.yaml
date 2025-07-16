@@ -37,6 +37,8 @@ dependencies:
   sqflite: ^2.4.2
   path: ^1.9.1
   image_picker: ^1.1.2
+  image: ^4.5.4
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
@@ -90,3 +92,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  assets:
+    - assets/dwarf_image_generation/caras/
+    - assets/dwarf_image_generation/1_cabezas/
+    - assets/dwarf_image_generation/2_ojos/
+    - assets/dwarf_image_generation/3_barbas/
+    - assets/dwarf_image_generation/4_sombreros/
