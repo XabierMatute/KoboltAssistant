@@ -153,12 +153,19 @@ Future<void> _generateFace() async {
     });
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Generar Cara'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save),
+            tooltip: 'Guardar imagen',
+            onPressed: _saveGeneratedImage,
+          ),
+        ],
       ),
       body: Container(
         color: const Color(0xFF002A5C),
@@ -281,10 +288,33 @@ Future<void> _generateFace() async {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _randomizeAndGenerate,
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        backgroundColor: Colors.blue,
         child: const Icon(Icons.casino, color: Colors.white),
       ),
     );
+  }
+  
+  void _saveGeneratedImage() async {
+    if (_outputPath.isNotEmpty) {
+      try {
+        final directory = await getApplicationDocumentsDirectory();
+        final newPath = '${directory.path}/saved_face_${DateTime.now().millisecondsSinceEpoch}.png';
+        await File(_outputPath).copy(newPath);
+  
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Imagen guardada exitosamente')),
+        );
+        print('Imagen guardada en: $newPath');
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al guardar la imagen: $e')),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No hay imagen generada para guardar')),
+      );
+    }
   }
   
   void _randomizeAndGenerate() {

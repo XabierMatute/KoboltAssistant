@@ -3,7 +3,8 @@ import 'package:caravana_enana/screens/attributes.dart';
 import 'package:caravana_enana/screens/dwarves.dart';
 import 'package:caravana_enana/screens/generate_dwarves.dart';
 import 'package:caravana_enana/screens/db_utils.dart';
-import 'package:caravana_enana/screens/generate_face.dart'; // Importa la página de generar caras
+import 'package:caravana_enana/screens/generate_face.dart';
+import 'package:caravana_enana/screens/gallery.dart'; // Importa la página de galería
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
@@ -86,6 +87,18 @@ class PageList extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const GenerateFaceScreen()),
+            );
+          },
+        ),
+        ListTile(
+          leading: const Icon(Icons.photo),
+          title: const Text('Galería'),
+          subtitle: const Text('Muestra todas las imágenes guardadas'),
+          trailing: const Icon(Icons.arrow_forward),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const GalleryScreen()),
             );
           },
         ),

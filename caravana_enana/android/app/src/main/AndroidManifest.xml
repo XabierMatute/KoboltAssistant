@@ -2,7 +2,7 @@
     <application
         android:label="caravana_enana"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/enanicon">
         <activity
             android:name=".MainActivity"
             android:exported="true"
