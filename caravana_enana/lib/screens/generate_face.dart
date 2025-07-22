@@ -39,6 +39,8 @@ Future<void> generarCara(String cabezaPath, String ojosPath, String barbaPath, S
   print('Imagen guardada en: $salidaPath');
 }
 
+
+
 class GenerateFaceScreen extends StatefulWidget {
   const GenerateFaceScreen({super.key});
 
@@ -47,58 +49,107 @@ class GenerateFaceScreen extends StatefulWidget {
 }
 
 class _GenerateFaceScreenState extends State<GenerateFaceScreen> {
-  String _image1Path = 'assets/dwarf_image_generation/1_cabezas/cabeza1.png';
-  String _image2Path = 'assets/dwarf_image_generation/2_ojos/ojo1.png';
-  String _image3Path = 'assets/dwarf_image_generation/3_barbas/barba1.png';
-  String _image4Path = 'assets/dwarf_image_generation/4_sombreros/sombrero1.png';
+  List<String> _image1Paths = [];
+  List<String> _image2Paths = [];
+  List<String> _image3Paths = [];
+  List<String> _image4Paths = [];
+  int _image1Index = 0;
+  int _image2Index = 0;
+  int _image3Index = 0;
+  int _image4Index = 0;
   String _outputPath = '';
 
-  Future<String> _getRandomImagePath(String folderPath) async {
-    final manifestContent = await rootBundle.loadString('AssetManifest.json');
-    final Map<String, dynamic> manifestMap = Map<String, dynamic>.from(json.decode(manifestContent));
-    final List<String> imagePaths = manifestMap.keys
-        .where((String key) => key.startsWith(folderPath))
-        .toList();
-    final random = Random();
-    return imagePaths[random.nextInt(imagePaths.length)];
-  }
+Future<void> _generateFace() async {
+  if (_image1Paths.isNotEmpty &&
+      _image2Paths.isNotEmpty &&
+      _image3Paths.isNotEmpty &&
+      _image4Paths.isNotEmpty) {
+    final cabezaPath = _image1Paths[_image1Index];
+    final ojosPath = _image2Paths[_image2Index];
+    final barbaPath = _image3Paths[_image3Index];
+    final sombreroPath = _image4Paths[_image4Index];
+    final salidaFileName = 'generated_face.png' + Random().nextInt(1000).toString() + '.png';
 
-  void _changeImage1() async {
-    final newPath = await _getRandomImagePath('assets/dwarf_image_generation/1_cabezas/');
-    setState(() {
-      _image1Path = newPath;
-    });
-  }
+    await generarCara(cabezaPath, ojosPath, barbaPath, sombreroPath, salidaFileName);
 
-  void _changeImage2() async {
-    final newPath = await _getRandomImagePath('assets/dwarf_image_generation/2_ojos/');
-    setState(() {
-      _image2Path = newPath;
-    });
-  }
-
-  void _changeImage3() async {
-    final newPath = await _getRandomImagePath('assets/dwarf_image_generation/3_barbas/');
-    setState(() {
-      _image3Path = newPath;
-    });
-  }
-
-  void _changeImage4() async {
-    final newPath = await _getRandomImagePath('assets/dwarf_image_generation/4_sombreros/');
-    setState(() {
-      _image4Path = newPath;
-    });
-  }
-
-  void _generateFace() async {
-    int randomIndex = Random().nextInt(1000);
-    final salidaFileName = 'cara_combinada_$randomIndex.png';
-    print('Generando cara con $_image1Path, $_image2Path, $_image3Path y $_image4Path');
-    await generarCara(_image1Path, _image2Path, _image3Path, _image4Path, salidaFileName);
     final directory = await getTemporaryDirectory();
     setState(() {
       _outputPath = '${directory.path}/$salidaFileName';
+    });
+  }
+}
+
+  @override
+  void initState() {
+    super.initState();
+    _loadImagePaths();
+  }
+
+  Future<void> _loadImagePaths() async {
+    final manifestContent = await rootBundle.loadString('AssetManifest.json');
+    final Map<String, dynamic> manifestMap = Map<String, dynamic>.from(json.decode(manifestContent));
+
+    setState(() {
+      _image1Paths = manifestMap.keys
+          .where((String key) => key.startsWith('assets/dwarf_image_generation/1_cabezas/'))
+          .toList();
+      _image2Paths = manifestMap.keys
+          .where((String key) => key.startsWith('assets/dwarf_image_generation/2_ojos/'))
+          .toList();
+      _image3Paths = manifestMap.keys
+          .where((String key) => key.startsWith('assets/dwarf_image_generation/3_barbas/'))
+          .toList();
+      _image4Paths = manifestMap.keys
+          .where((String key) => key.startsWith('assets/dwarf_image_generation/4_sombreros/'))
+          .toList();
+    });
+  }
+
+  void _previousImage1() {
+    setState(() {
+      _image1Index = (_image1Index - 1 + _image1Paths.length) % _image1Paths.length;
+    });
+  }
+
+  void _nextImage1() {
+    setState(() {
+      _image1Index = (_image1Index + 1) % _image1Paths.length;
+    });
+  }
+
+  void _previousImage2() {
+    setState(() {
+      _image2Index = (_image2Index - 1 + _image2Paths.length) % _image2Paths.length;
+    });
+  }
+
+  void _nextImage2() {
+    setState(() {
+      _image2Index = (_image2Index + 1) % _image2Paths.length;
+    });
+  }
+
+  void _previousImage3() {
+    setState(() {
+      _image3Index = (_image3Index - 1 + _image3Paths.length) % _image3Paths.length;
+    });
+  }
+
+  void _nextImage3() {
+    setState(() {
+      _image3Index = (_image3Index + 1) % _image3Paths.length;
+    });
+  }
+
+  void _previousImage4() {
+    setState(() {
+      _image4Index = (_image4Index - 1 + _image4Paths.length) % _image4Paths.length;
+    });
+  }
+
+  void _nextImage4() {
+    setState(() {
+      _image4Index = (_image4Index + 1) % _image4Paths.length;
     });
   }
 
@@ -110,7 +161,6 @@ class _GenerateFaceScreenState extends State<GenerateFaceScreen> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Container(
-        //cobalt blue
         color: const Color(0xFF002A5C),
         child: SingleChildScrollView(
           child: Column(
@@ -124,16 +174,19 @@ class _GenerateFaceScreenState extends State<GenerateFaceScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_left),
+                    onPressed: _previousImage1,
+                  ),
                   Image.asset(
-                    _image1Path,
+                    _image1Paths.isNotEmpty ? _image1Paths[_image1Index] : '',
                     width: 100,
                     height: 100,
                     fit: BoxFit.cover,
                   ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: _changeImage1,
-                    child: const Text('Change'),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_right),
+                    onPressed: _nextImage1,
                   ),
                 ],
               ),
@@ -141,16 +194,19 @@ class _GenerateFaceScreenState extends State<GenerateFaceScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_left),
+                    onPressed: _previousImage2,
+                  ),
                   Image.asset(
-                    _image2Path,
+                    _image2Paths.isNotEmpty ? _image2Paths[_image2Index] : '',
                     width: 100,
                     height: 100,
                     fit: BoxFit.cover,
                   ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: _changeImage2,
-                    child: const Text('Change'),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_right),
+                    onPressed: _nextImage2,
                   ),
                 ],
               ),
@@ -158,16 +214,19 @@ class _GenerateFaceScreenState extends State<GenerateFaceScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_left),
+                    onPressed: _previousImage3,
+                  ),
                   Image.asset(
-                    _image3Path,
+                    _image3Paths.isNotEmpty ? _image3Paths[_image3Index] : '',
                     width: 100,
                     height: 100,
                     fit: BoxFit.cover,
                   ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: _changeImage3,
-                    child: const Text('Change'),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_right),
+                    onPressed: _nextImage3,
                   ),
                 ],
               ),
@@ -175,16 +234,19 @@ class _GenerateFaceScreenState extends State<GenerateFaceScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_left),
+                    onPressed: _previousImage4,
+                  ),
                   Image.asset(
-                    _image4Path,
+                    _image4Paths.isNotEmpty ? _image4Paths[_image4Index] : '',
                     width: 100,
                     height: 100,
                     fit: BoxFit.cover,
                   ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: _changeImage4,
-                    child: const Text('Change'),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_right),
+                    onPressed: _nextImage4,
                   ),
                 ],
               ),
@@ -217,6 +279,22 @@ class _GenerateFaceScreenState extends State<GenerateFaceScreen> {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _randomizeAndGenerate,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        child: const Icon(Icons.casino, color: Colors.white),
+      ),
     );
+  }
+  
+  void _randomizeAndGenerate() {
+    final random = Random();
+    setState(() {
+      _image1Index = random.nextInt(_image1Paths.length);
+      _image2Index = random.nextInt(_image2Paths.length);
+      _image3Index = random.nextInt(_image3Paths.length);
+      _image4Index = random.nextInt(_image4Paths.length);
+    });
+    _generateFace();
   }
 }
