@@ -25,6 +25,21 @@ class Dwarf {
   String toString() {
     return 'Dwarf{id: $id, name: $name, title: $title, photoPath: $photoPath}';
   }
+
+  // Implementación de copyWith
+  Dwarf copyWith({
+    int? id,
+    String? name,
+    String? title,
+    String? photoPath,
+  }) {
+    return Dwarf(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      title: title ?? this.title,
+      photoPath: photoPath ?? this.photoPath,
+    );
+  }
 }
 
 class DwarfTable {

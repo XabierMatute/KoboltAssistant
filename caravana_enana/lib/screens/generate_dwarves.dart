@@ -25,12 +25,33 @@ class _GenerateDwarvesScreenState extends State<GenerateDwarvesScreen> {
   List<String> _barbas = [];
   List<String> _sombreros = [];
 
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _loadAssets().then((_) => _generateDwarf()); // Cargar archivos y generar un enano
+
+    _nameController.addListener(_updateGeneratedDwarfText);
+    _titleController.addListener(_updateGeneratedDwarfText);
+
   }
 
+  @override
+  void dispose() {
+    // Eliminar los listeners al destruir el widget
+    _nameController.dispose();
+    _titleController.dispose();
+    super.dispose();
+  }
+  void _updateGeneratedDwarfText() {
+    if (_currentDwarf != null) {
+      setState(() {
+        _generatedDwarf = '${_nameController.text} ${_titleController.text}';
+      });
+    }
+  }
   Future<void> _loadAssets() async {
     try {
       // Cargar las rutas de las imágenes desde el AssetManifest.json
@@ -96,6 +117,8 @@ class _GenerateDwarvesScreenState extends State<GenerateDwarvesScreen> {
           title: dwarf.title,
           photoPath: imagePath, // Asignar la ruta de la imagen al enano
         );
+        _nameController.text = dwarf.name; // Actualizar el controlador del nombre
+        _titleController.text = dwarf.title; // Actualizar el controlador del título
         _generatedImagePath = imagePath;
       });
     } catch (e) {
@@ -110,6 +133,12 @@ class _GenerateDwarvesScreenState extends State<GenerateDwarvesScreen> {
   Future<void> _saveDwarf(BuildContext context) async {
     if (_currentDwarf != null) {
       try {
+        // Actualizar el nombre y el título del enano antes de guardarlo
+        _currentDwarf = _currentDwarf!.copyWith(
+          name: _nameController.text,
+          title: _titleController.text,
+        );
+
         await DwarfTable.insertDwarf(_currentDwarf!);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Enano guardado exitosamente')),
@@ -164,10 +193,27 @@ class _GenerateDwarvesScreenState extends State<GenerateDwarvesScreen> {
                   Text(
                     _generatedDwarf.isEmpty
                         ? 'Generando un enano...'
-                        : 'Enano generado: $_generatedDwarf',
+                        : '$_generatedDwarf',
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nombre del Enano',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _titleController,
+                    decoration: const InputDecoration(
+                      labelText: 'Título del Enano',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+
                 ],
               ),
             ),
