@@ -143,6 +143,50 @@ class NameTable {
     print('Deleted name with id: $id');
   }
 
+  // ...
+
+  /// Capitaliza los nombres y elimina los nombres repetidos de la base de datos
+  static Future<void> normalizeNames() async {
+    final db = await DatabaseService.getDatabase();
+
+    // Obtener todos los nombres de la base de datos
+    final List<Map<String, dynamic>> maps = await db.query('names');
+
+    // Crear un mapa para almacenar nombres únicos con formato capitalizado
+    final Map<String, Name> uniqueNames = {};
+
+    for (var map in maps) {
+      final name = Name(
+        id: map['id'],
+        name: _capitalize(map['name']),
+        description: map['description'],
+      );
+
+      // Si el nombre ya existe, ignóralo; de lo contrario, agrégalo
+      if (!uniqueNames.containsKey(name.name)) {
+        uniqueNames[name.name] = name;
+      }
+    }
+
+    // Vaciar la tabla
+    await emptyTable();
+
+    // Insertar los nombres únicos y capitalizados
+    for (var name in uniqueNames.values) {
+      await insertName(name);
+    }
+
+    print('Nombres normalizados: capitalizados y duplicados eliminados.');
+  }
+
+  /// Capitaliza un nombre (primera letra en mayúscula, el resto en minúscula)
+  static String _capitalize(String name) {
+    if (name.isEmpty) return name;
+    return name[0].toUpperCase() + name.substring(1).toLowerCase();
+  }
+
+    // ...
+
 }
 
 const nombresEj = [

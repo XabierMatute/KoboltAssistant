@@ -121,6 +121,49 @@ class TitleTable {
     );
     print('Deleted title with id: $id');
   }
+
+    // ...
+
+  /// Convierte los títulos a minúsculas y elimina los títulos repetidos de la base de datos
+  static Future<void> normalizeTitles() async {
+    final db = await DatabaseService.getDatabase();
+
+    // Obtener todos los títulos de la base de datos
+    final List<Map<String, dynamic>> maps = await db.query('titles');
+
+    // Crear un mapa para almacenar títulos únicos en minúsculas
+    final Map<String, FantasyTitle> uniqueTitles = {};
+
+    for (var map in maps) {
+      final title = FantasyTitle(
+        id: map['id'],
+        name: _toLowerCase(map['name']),
+        description: map['description'],
+      );
+
+      // Si el título ya existe, ignóralo; de lo contrario, agrégalo
+      if (!uniqueTitles.containsKey(title.name)) {
+        uniqueTitles[title.name] = title;
+      }
+    }
+
+    // Vaciar la tabla
+    await emptyTable();
+
+    // Insertar los títulos únicos y en minúsculas
+    for (var title in uniqueTitles.values) {
+      await insertTitle(title);
+    }
+
+    print('Títulos normalizados: convertidos a minúsculas y duplicados eliminados.');
+  }
+
+  /// Convierte un título a minúsculas
+  static String _toLowerCase(String title) {
+    return title.toLowerCase();
+  }
+
+  // ...
 }
 
 const titlesEj = [
