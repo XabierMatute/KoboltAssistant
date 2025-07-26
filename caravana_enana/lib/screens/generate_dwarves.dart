@@ -128,6 +128,12 @@ class _GenerateDwarvesScreenState extends State<GenerateDwarvesScreen> {
       appBar: AppBar(
         title: const Text('Generar Enanos'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: () => _saveDwarf(context),
+          ),
+        ],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -161,27 +167,13 @@ class _GenerateDwarvesScreenState extends State<GenerateDwarvesScreen> {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: _generateDwarf,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text('Generar Otro Enano'),
-            ),
-          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _saveDwarf(context),
+        onPressed: _generateDwarf,
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
-        child: const Icon(Icons.save),
+        child: const Icon(Icons.refresh),
       ),
     );
   }
