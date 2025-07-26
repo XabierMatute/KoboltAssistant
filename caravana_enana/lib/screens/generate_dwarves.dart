@@ -90,7 +90,12 @@ class _GenerateDwarvesScreenState extends State<GenerateDwarvesScreen> {
 
       setState(() {
         _generatedDwarf = '${dwarf.name} ${dwarf.title}';
-        _currentDwarf = dwarf;
+        _currentDwarf = Dwarf(
+          id: dwarf.id,
+          name: dwarf.name,
+          title: dwarf.title,
+          photoPath: imagePath, // Asignar la ruta de la imagen al enano
+        );
         _generatedImagePath = imagePath;
       });
     } catch (e) {
