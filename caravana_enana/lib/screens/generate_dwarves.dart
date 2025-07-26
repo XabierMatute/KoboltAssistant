@@ -1,12 +1,15 @@
 import 'dart:io';
 import 'dart:math';
 import 'dart:convert';
+import 'package:caravana_enana/db/name.dart';
+import 'package:caravana_enana/db/title.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:caravana_enana/db/dwarf.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
 import 'package:caravana_enana/image_generation/compose_image.dart'; // Importa composeImage
+import 'package:image_picker/image_picker.dart'; // Importar ImagePicker para subir imágenes
 
 class GenerateDwarvesScreen extends StatefulWidget {
   const GenerateDwarvesScreen({super.key});
@@ -14,6 +17,7 @@ class GenerateDwarvesScreen extends StatefulWidget {
   @override
   _GenerateDwarvesScreenState createState() => _GenerateDwarvesScreenState();
 }
+
 
 class _GenerateDwarvesScreenState extends State<GenerateDwarvesScreen> {
   String _generatedDwarf = '';
@@ -35,7 +39,6 @@ class _GenerateDwarvesScreenState extends State<GenerateDwarvesScreen> {
 
     _nameController.addListener(_updateGeneratedDwarfText);
     _titleController.addListener(_updateGeneratedDwarfText);
-
   }
 
   @override
@@ -45,13 +48,13 @@ class _GenerateDwarvesScreenState extends State<GenerateDwarvesScreen> {
     _titleController.dispose();
     super.dispose();
   }
+
   void _updateGeneratedDwarfText() {
-    if (_currentDwarf != null) {
-      setState(() {
-        _generatedDwarf = '${_nameController.text} ${_titleController.text}';
-      });
-    }
+    setState(() {
+      _generatedDwarf = '${_nameController.text} ${_titleController.text}';
+    });
   }
+
   Future<void> _loadAssets() async {
     try {
       // Cargar las rutas de las imágenes desde el AssetManifest.json
@@ -129,6 +132,70 @@ class _GenerateDwarvesScreenState extends State<GenerateDwarvesScreen> {
       });
     }
   }
+Future<void> _showImageOptionsDialog() async {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return AlertDialog(
+            title: const Text('Cara'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _generatedImagePath != null
+                    ? Image.file(
+                        File(_generatedImagePath!),
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.cover,
+                      )
+                    : const Icon(
+                        Icons.image,
+                        size: 150,
+                        color: Colors.grey,
+                      ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.upload_file, size: 40),
+                      onPressed: () async {
+                        Navigator.of(context).pop(); // Cierra el diálogo
+                        await _pickImageFromGallery();
+                      },
+                      tooltip: 'Subir Imagen',
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.casino, size: 40),
+                      onPressed: () async {
+                        await _updateDwarfImage();
+                        setState(() {}); // Actualiza el estado del diálogo
+                      },
+                      tooltip: 'Generar Aleatoria',
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+  Future<void> _pickImageFromGallery() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _generatedImagePath = pickedFile.path;
+      });
+    }
+  }
 
   Future<void> _saveDwarf(BuildContext context) async {
     if (_currentDwarf != null) {
@@ -156,7 +223,7 @@ class _GenerateDwarvesScreenState extends State<GenerateDwarvesScreen> {
     }
   }
 
-  @override
+   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -177,18 +244,21 @@ class _GenerateDwarvesScreenState extends State<GenerateDwarvesScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _generatedImagePath != null
-                      ? Image.file(
-                          File(_generatedImagePath!),
-                          width: 200,
-                          height: 200,
-                          fit: BoxFit.cover,
-                        )
-                      : const Icon(
-                          Icons.image,
-                          size: 200,
-                          color: Colors.grey,
-                        ),
+                  GestureDetector(
+                    onTap: _showImageOptionsDialog,
+                    child: _generatedImagePath != null
+                        ? Image.file(
+                            File(_generatedImagePath!),
+                            width: 200,
+                            height: 200,
+                            fit: BoxFit.cover,
+                          )
+                        : const Icon(
+                            Icons.image,
+                            size: 200,
+                            color: Colors.grey,
+                          ),
+                  ),
                   const SizedBox(height: 20),
                   Text(
                     _generatedDwarf.isEmpty
@@ -198,22 +268,53 @@ class _GenerateDwarvesScreenState extends State<GenerateDwarvesScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
-                  TextField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Nombre del Enano',
-                      border: OutlineInputBorder(),
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _nameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Nombre del Enano',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.casino),
+                        onPressed: () async {
+                          final randomName = await _generateRandomName();
+                          setState(() {
+                            _nameController.text = randomName;
+                          });
+                        },
+                        tooltip: 'Generar Nombre Aleatorio',
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 10),
-                  TextField(
-                    controller: _titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Título del Enano',
-                      border: OutlineInputBorder(),
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _titleController,
+                          decoration: const InputDecoration(
+                            labelText: 'Título del Enano',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.casino),
+                        onPressed: () async {
+                          final randomTitle = await _generateRandomTitle();
+                          setState(() {
+                            _titleController.text = randomTitle;
+                          });
+                        },
+                        tooltip: 'Generar Título Aleatorio',
+                      ),
+                    ],
                   ),
-
                 ],
               ),
             ),
@@ -227,5 +328,58 @@ class _GenerateDwarvesScreenState extends State<GenerateDwarvesScreen> {
         child: const Icon(Icons.refresh),
       ),
     );
+  }
+
+Future<String> _generateRandomName() async {
+  final names = await NameTable.getNames(); // Obtén los nombres de la base de datos
+  final random = Random();
+  return names[random.nextInt(names.length)].name;
+}
+
+Future<String> _generateRandomTitle() async {
+  final titles = await TitleTable.getTitles(); // Obtén los títulos de la base de datos
+  final random = Random();
+  return titles[random.nextInt(titles.length)].name;
+}
+
+    Future<void> _updateDwarfImage() async {
+    try {
+      final random = Random();
+  
+      // Seleccionar imágenes aleatorias
+      final cabezaPath = _cabezas[random.nextInt(_cabezas.length)];
+      final ojosPath = _ojos[random.nextInt(_ojos.length)];
+      final barbaPath = _barbas[random.nextInt(_barbas.length)];
+      final sombreroPath = _sombreros[random.nextInt(_sombreros.length)];
+  
+      // Cargar y decodificar las imágenes desde los assets
+      final cabezaBytes = await rootBundle.load(cabezaPath);
+      final ojosBytes = await rootBundle.load(ojosPath);
+      final barbaBytes = await rootBundle.load(barbaPath);
+      final sombreroBytes = await rootBundle.load(sombreroPath);
+  
+      final cabeza = img.decodeImage(cabezaBytes.buffer.asUint8List())!;
+      final ojos = img.decodeImage(ojosBytes.buffer.asUint8List())!;
+      final barba = img.decodeImage(barbaBytes.buffer.asUint8List())!;
+      final sombrero = img.decodeImage(sombreroBytes.buffer.asUint8List())!;
+  
+      // Componer la imagen
+      final composedImage = composeImage([cabeza, ojos, barba, sombrero]);
+  
+      // Guardar la imagen compuesta
+      final directory = await getTemporaryDirectory();
+      final imagePath = '${directory.path}/generated_dwarf_${DateTime.now().millisecondsSinceEpoch}.png';
+      File(imagePath).writeAsBytesSync(img.encodePng(composedImage));
+  
+      // Actualizar solo la imagen
+      setState(() {
+        _generatedImagePath = imagePath;
+      });
+    } catch (e) {
+      setState(() {
+        _generatedDwarf = 'Error al actualizar la imagen: $e';
+        _generatedImagePath = null;
+      });
+    }
   }
 }
