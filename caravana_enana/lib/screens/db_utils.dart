@@ -105,6 +105,20 @@ class DatabaseUtilsScreen extends StatelessWidget {
     }
   }
 
+  Future<void> _sanitizeDatabase(BuildContext context) async {
+    try {
+      await NameTable.normalizeNames();
+      await TitleTable.normalizeTitles();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Base de datos saneada exitosamente')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al sanear la base de datos: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -151,6 +165,18 @@ class DatabaseUtilsScreen extends StatelessWidget {
                 ),
               ),
               child: const Text('Ver Tablas de la Base de Datos'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => _sanitizeDatabase(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Sanear Base de Datos'),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
