@@ -204,8 +204,9 @@ Future<void> _showImageOptionsDialog() async {
         _currentDwarf = _currentDwarf!.copyWith(
           name: _nameController.text,
           title: _titleController.text,
+          photoPath: _generatedImagePath, // Asegurarse de guardar la imagen actualizada
         );
-
+  
         await DwarfTable.insertDwarf(_currentDwarf!);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Enano guardado exitosamente')),
@@ -222,7 +223,6 @@ Future<void> _showImageOptionsDialog() async {
       );
     }
   }
-
    @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -342,44 +342,85 @@ Future<String> _generateRandomTitle() async {
   return titles[random.nextInt(titles.length)].name;
 }
 
-    Future<void> _updateDwarfImage() async {
-    try {
-      final random = Random();
-  
-      // Seleccionar imágenes aleatorias
-      final cabezaPath = _cabezas[random.nextInt(_cabezas.length)];
-      final ojosPath = _ojos[random.nextInt(_ojos.length)];
-      final barbaPath = _barbas[random.nextInt(_barbas.length)];
-      final sombreroPath = _sombreros[random.nextInt(_sombreros.length)];
-  
-      // Cargar y decodificar las imágenes desde los assets
-      final cabezaBytes = await rootBundle.load(cabezaPath);
-      final ojosBytes = await rootBundle.load(ojosPath);
-      final barbaBytes = await rootBundle.load(barbaPath);
-      final sombreroBytes = await rootBundle.load(sombreroPath);
-  
-      final cabeza = img.decodeImage(cabezaBytes.buffer.asUint8List())!;
-      final ojos = img.decodeImage(ojosBytes.buffer.asUint8List())!;
-      final barba = img.decodeImage(barbaBytes.buffer.asUint8List())!;
-      final sombrero = img.decodeImage(sombreroBytes.buffer.asUint8List())!;
-  
-      // Componer la imagen
-      final composedImage = composeImage([cabeza, ojos, barba, sombrero]);
-  
-      // Guardar la imagen compuesta
-      final directory = await getTemporaryDirectory();
-      final imagePath = '${directory.path}/generated_dwarf_${DateTime.now().millisecondsSinceEpoch}.png';
-      File(imagePath).writeAsBytesSync(img.encodePng(composedImage));
-  
-      // Actualizar solo la imagen
-      setState(() {
-        _generatedImagePath = imagePath;
-      });
-    } catch (e) {
-      setState(() {
-        _generatedDwarf = 'Error al actualizar la imagen: $e';
-        _generatedImagePath = null;
-      });
-    }
+Future<void> _updateDwarfImage() async {
+  try {
+    final random = Random();
+
+    // Seleccionar imágenes aleatorias
+    final cabezaPath = _cabezas[random.nextInt(_cabezas.length)];
+    final ojosPath = _ojos[random.nextInt(_ojos.length)];
+    final barbaPath = _barbas[random.nextInt(_barbas.length)];
+    final sombreroPath = _sombreros[random.nextInt(_sombreros.length)];
+
+    // Cargar y decodificar las imágenes desde los assets
+    final cabezaBytes = await rootBundle.load(cabezaPath);
+    final ojosBytes = await rootBundle.load(ojosPath);
+    final barbaBytes = await rootBundle.load(barbaPath);
+    final sombreroBytes = await rootBundle.load(sombreroPath);
+
+    final cabeza = img.decodeImage(cabezaBytes.buffer.asUint8List())!;
+    final ojos = img.decodeImage(ojosBytes.buffer.asUint8List())!;
+    final barba = img.decodeImage(barbaBytes.buffer.asUint8List())!;
+    final sombrero = img.decodeImage(sombreroBytes.buffer.asUint8List())!;
+
+    // Componer la imagen
+    final composedImage = composeImage([cabeza, ojos, barba, sombrero]);
+
+    // Guardar la imagen compuesta
+    final directory = await getTemporaryDirectory();
+    final imagePath = '${directory.path}/generated_dwarf_${DateTime.now().millisecondsSinceEpoch}.png';
+    File(imagePath).writeAsBytesSync(img.encodePng(composedImage));
+
+    // Actualizar solo la imagen y el _currentDwarf
+    setState(() {
+      _generatedImagePath = imagePath;
+      if (_currentDwarf != null) {
+        _currentDwarf = _currentDwarf!.copyWith(photoPath: imagePath);
+      }
+    });
+  } catch (e) {
+    setState(() {
+      _generatedDwarf = 'Error al actualizar la imagen: $e';
+      _generatedImagePath = null;
+    });
+}
+  try {
+    final random = Random();
+
+    // Seleccionar imágenes aleatorias
+    final cabezaPath = _cabezas[random.nextInt(_cabezas.length)];
+    final ojosPath = _ojos[random.nextInt(_ojos.length)];
+    final barbaPath = _barbas[random.nextInt(_barbas.length)];
+    final sombreroPath = _sombreros[random.nextInt(_sombreros.length)];
+
+    // Cargar y decodificar las imágenes desde los assets
+    final cabezaBytes = await rootBundle.load(cabezaPath);
+    final ojosBytes = await rootBundle.load(ojosPath);
+    final barbaBytes = await rootBundle.load(barbaPath);
+    final sombreroBytes = await rootBundle.load(sombreroPath);
+
+    final cabeza = img.decodeImage(cabezaBytes.buffer.asUint8List())!;
+    final ojos = img.decodeImage(ojosBytes.buffer.asUint8List())!;
+    final barba = img.decodeImage(barbaBytes.buffer.asUint8List())!;
+    final sombrero = img.decodeImage(sombreroBytes.buffer.asUint8List())!;
+
+    // Componer la imagen
+    final composedImage = composeImage([cabeza, ojos, barba, sombrero]);
+
+    // Guardar la imagen compuesta
+    final directory = await getTemporaryDirectory();
+    final imagePath = '${directory.path}/generated_dwarf_${DateTime.now().millisecondsSinceEpoch}.png';
+    File(imagePath).writeAsBytesSync(img.encodePng(composedImage));
+
+    // Actualizar solo la imagen
+    setState(() {
+      _generatedImagePath = imagePath;
+    });
+  } catch (e) {
+    setState(() {
+      _generatedDwarf = 'Error al actualizar la imagen: $e';
+      _generatedImagePath = null;
+    });
+  }
   }
 }
